@@ -19,4 +19,7 @@
 ## 📸 Capturas de pantalla
 
 ![Dónde Voto](PNG/image1.png)
+<br></br>
 ![Dónde Voto](PNG/image2.png)
+<br></br>
+![Dónde Voto](PNG/image3.png)
