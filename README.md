@@ -1,4 +1,4 @@
-# Consulta Global 🌎🗳️
+# Consulta Global 🌎
 
 **Consulta Global** es una aplicación que te permite descubrir fácilmente dónde votar y acceder a los enlaces oficiales de registro electoral de diferentes países alrededor del mundo.
 
@@ -18,4 +18,5 @@
 
 ## 📸 Capturas de pantalla
 
-*(Aquí puedes agregar capturas mostrando el globo, la búsqueda, etc.)*
+![Dónde Voto](PNG/image1.png)
+![Dónde Voto](PNG/image2.png)
