@@ -16,7 +16,7 @@
 - (Opcional) Three.js para visualización 3D
 - APIs de hora mundial y registros electorales oficiales
 
-## 📸 Capturas de pantalla
+## 📷 Capturas de pantalla
 
 ![Dónde Voto](PNG/image1.png)
 <br></br>
