@@ -209,56 +209,65 @@
             transform: translateY(10px);
             opacity: 0; /* Iniciar oculto */
             display: none; /* Iniciar oculto */
+            /* Flexbox para mejor control del layout interno */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centrar contenido */
         }
 
         #info-panel.visible {
              opacity: 1;
              transform: translateY(0);
-             display: block; /* Hacer visible */
+             display: flex; /* Hacer visible */
         }
 
         /* Contenedor para el nombre del país y la hora local */
         #country-header {
             display: flex; /* Usar flexbox */
-            justify-content: space-between; /* Espacio entre nombre y hora */
-            align-items: center; /* Alinear verticalmente */
-            margin-bottom: 5px; /* Espacio debajo del encabezado */
+            flex-direction: column; /* Nombre y hora en columna en panel */
+            align-items: center; /* Centrar texto */
+            width: 100%; /* Ocupar ancho completo del panel */
+            margin-bottom: 10px; /* Espacio debajo del encabezado */
             border-bottom: 1px solid rgba(255, 255, 255, 0.3); /* Borde debajo */
-            padding-bottom: 5px;
+            padding-bottom: 10px;
+            text-align: center; /* Asegurar centrado */
         }
 
         #country-name {
-            margin: 0; /* Eliminar margen por defecto */
-            font-size: 1.2em;
+            margin: 0 0 5px 0; /* Espacio debajo del nombre */
+            font-size: 1.4em; /* Aumentar tamaño del nombre */
+            font-weight: bold; /* Negrita para el nombre */
             color: #fff; /* Encabezado blanco */
+            word-break: break-word; /* Romper palabras largas si es necesario */
         }
 
         /* Estilo para la hora local */
         #local-time {
-            font-size: 0.9em;
+            font-size: 1em; /* Aumentar tamaño de la hora */
             color: #00ffff; /* Color cian para la hora */
             font-weight: bold; /* Texto en negrita */
             margin: 0; /* Eliminar margen por defecto */
-            text-align: right; /* Alinear hora a la derecha */
-            padding: 2px 5px; /* Pequeño padding para el fondo */
+            text-align: center; /* Alinear hora al centro */
+            padding: 4px 8px; /* Pequeño padding para el fondo */
             background-color: rgba(0, 255, 255, 0.1); /* Fondo semi-transparente cian */
             border-radius: 4px; /* Bordes redondeados */
         }
 
         /* Contenedor para la bandera */
         #flag-container {
-            margin-bottom: 10px;
+            margin-bottom: 15px; /* Más espacio debajo de la bandera */
             text-align: center;
-            height: 40px; /* Altura fija para bandera */
+            height: 50px; /* Altura fija para bandera */
             display: flex;
             justify-content: center;
             align-items: center;
             margin-top: 10px; /* Added space above the flag */
+            width: 100%; /* Ocupar ancho completo para centrado */
         }
          /* Estilo para la imagen de la bandera */
          #flag-container img {
-            max-width: 60px; /* Limitar ancho de bandera */
-            max-height: 40px; /* Limitar altura de bandera */
+            max-width: 80px; /* Limitar ancho de bandera */
+            max-height: 50px; /* Limitar altura de bandera */
             height: auto;
             border: 1px solid rgba(255,255,255,0.3); /* Borde ajustado para tema oscuro */
             background-color: rgba(255,255,255,0.1); /* Ligero fondo para banderas */
@@ -266,10 +275,14 @@
          }
          /* Estilo para placeholder/emoji de bandera */
          #flag-container span {
-            font-size: 30px; /* Hacer los emojis de bandera más grandes */
+            font-size: 40px; /* Hacer los emojis de bandera más grandes */
          }
 
         /* Contenedor para enlaces generales del país */
+        #links-container {
+             width: 100%; /* Ocupar ancho completo del panel */
+             text-align: center; /* Centrar enlaces */
+        }
         #links-container a {
             display: block;
             margin-bottom: 8px; /* Espaciado aumentado */
@@ -290,12 +303,14 @@
             padding-top: 10px;
             border-top: 1px solid rgba(255, 255, 255, 0.2);
             display: none; /* Oculto por defecto */
+            width: 100%; /* Ocupar ancho completo del panel */
         }
 
         /* Estilo para el contenedor del input de búsqueda de provincias */
         #province-search-container {
             margin-bottom: 10px; /* Espacio debajo del buscador */
             position: relative; /* Necesario para posicionar el dropdown */
+            width: 100%; /* Ocupar ancho completo */
         }
 
         #province-search-container label {
@@ -304,6 +319,7 @@
              font-weight: bold;
              font-size: 0.9em;
              color: #ccc;
+             text-align: left; /* Alinear label a la izquierda */
         }
 
         /* Estilo para el input del buscador de provincias */
@@ -330,6 +346,8 @@
         #province-links-container {
             min-height: 20px; /* Asegurar espacio aunque no se muestre enlace inicialmente */
             margin-bottom: 10px; /* Espacio debajo del enlace de provincia */
+            width: 100%; /* Ocupar ancho completo */
+            text-align: center; /* Centrar enlaces */
         }
 
         #province-links-container a {
@@ -347,6 +365,10 @@
         }
 
         /* Contenedor nacionales (siempre visible cuando Argentina está seleccionada) */
+        .national-links {
+             width: 100%; /* Ocupar ancho completo */
+             text-align: center; /* Centrar enlaces */
+        }
         .national-links h3 {
             margin-top: 0;
             margin-bottom: 8px;
@@ -567,26 +589,47 @@
                  display: none; /* Ocultar completamente el título */
              }
 
-
+            /* Ajustes para el panel de información en móviles */
             #info-panel {
                 bottom: 10px; /* Ajustado para pantallas pequeñas */
                 right: 10px; /* Ajustado para pantallas pequeñas */
-                max-width: 180px;
+                left: 10px; /* Añadido para ocupar ancho en móviles */
+                max-width: none; /* Eliminar max-width en móviles */
+                width: auto; /* Permitir que el ancho se ajuste al contenido */
                 padding: 10px;
+                /* Asegurar que el contenido interno se centre y ajuste */
+                align-items: center;
             }
-            #info-panel h2 {
-                font-size: 1em;
+
+            #country-header {
+                flex-direction: column; /* Nombre y hora en columna */
+                align-items: center; /* Centrar texto */
+                padding-bottom: 8px; /* Reducir padding */
+                margin-bottom: 8px; /* Reducir margen */
             }
+
+            #country-name {
+                font-size: 1.2em; /* Reducir tamaño del nombre */
+                margin-bottom: 3px; /* Reducir margen */
+            }
+
+            #local-time {
+                font-size: 0.9em; /* Reducir tamaño de la hora */
+                padding: 2px 5px; /* Reducir padding */
+            }
+
             #flag-container {
-                height: 30px;
+                height: 40px; /* Ajustar altura de bandera */
+                margin-bottom: 10px; /* Ajustar margen */
             }
              #flag-container img {
-                max-width: 45px;
-                max-height: 30px;
+                max-width: 60px; /* Ajustar ancho de bandera */
+                max-height: 40px; /* Ajustar altura de bandera */
              }
              #flag-container span {
-                font-size: 24px;
+                font-size: 30px; /* Ajustar tamaño de emoji */
              }
+
             #links-container a,
             #province-links-container a,
             #argentina-provinces label,
@@ -595,6 +638,25 @@
             .national-links a {
                 font-size: 0.8em;
             }
+
+             /* Ajustar modal para móviles */
+             #modal-container {
+                 width: 95%; /* Usar más ancho en móviles */
+                 padding: 15px; /* Reducir padding */
+             }
+
+             #modal-title {
+                 font-size: 1.2em; /* Reducir tamaño del título del modal */
+             }
+
+             #modal-search-input {
+                 padding: 8px 12px; /* Reducir padding */
+             }
+
+             #modal-list.dropdown-list button {
+                 padding: 8px 12px; /* Reducir padding en botones del modal */
+                 font-size: 0.9em; /* Reducir tamaño de fuente */
+             }
         }
 
     </style>
@@ -738,7 +800,7 @@
       },
       'la-rioja': {
         name: 'La Rioja',
-        url: 'https://larioja.padron.gov.ar/'
+        url: 'https://larioja.padron.gob.ar/'
       },
       'mendoza': {
         name: 'Mendoza',
@@ -754,7 +816,7 @@
       },
       'rio-negro': {
         name: 'Río Negro',
-        url: 'https://rionegro.padron.gov.ar/'
+        url: 'https://rionegro.padron.gob.ar/'
       },
       'salta': {
         name: 'Salta',
@@ -766,7 +828,7 @@
       },
       'san-luis': {
         name: 'San Luis',
-        url: 'https://sanluis.padron.gov.ar/'
+        url: 'https://sanluis.padron.gob.ar/'
       },
       'santa-cruz': {
         name: 'Santa Cruz',
