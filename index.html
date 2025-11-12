@@ -322,10 +322,10 @@
              text-align: left; /* Alinear label a la izquierda */
         }
 
-        /* Estilo para el input del buscador de provincias */
+        /* Estilo para el SELECT del buscador de provincias */
         #province-search {
-            width: calc(100% - 24px); /* Ajustar ancho para padding */
-            padding: 10px 12px; /* Padding */
+            width: 100%; /* Ocupar ancho completo */
+            padding: 10px 8px; /* Padding (selects manejan padding diferente) */
             border: 1px solid #555;
             border-radius: 3px;
             background-color: rgba(0,0,0, 0.3);
@@ -334,6 +334,13 @@
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer; /* Indicar que es clickable */
             box-sizing: border-box; /* Incluir padding y borde en el ancho */
+            font-size: 0.9em; /* Heredar tamaño de fuente */
+            /* Permitir apariencia nativa para mejor UX móvil */
+        }
+        /* Estilo para las opciones (importante en modo oscuro) */
+        #province-search option {
+             background-color: #222; /* Fondo oscuro para dropdown */
+             color: #f0f0f0; /* Texto claro */
         }
 
         /* Estilo para el input del buscador de provincias al enfocar */
@@ -695,8 +702,10 @@
         <div id="argentina-provinces">
             <div id="province-search-container">
                 <label for="province-search">Provincia:</label>
-                <input type="text" id="province-search" placeholder="Escriba o seleccione..." readonly>
-                </div>
+                <select id="province-search">
+                    <option value="" disabled selected>Seleccione una provincia...</option>
+                    </select>
+            </div>
 
             <div style="text-align:center;" id="province-links-container"></div>
 
@@ -800,7 +809,7 @@
       },
       'la-rioja': {
         name: 'La Rioja',
-        url: 'https://larioja.padron.gob.ar/'
+        url: 'https://larioja.padron.gov.ar/'
       },
       'mendoza': {
         name: 'Mendoza',
@@ -816,7 +825,7 @@
       },
       'rio-negro': {
         name: 'Río Negro',
-        url: 'https://rionegro.padron.gob.ar/'
+        url: 'https://rionegro.padron.gov.ar/'
       },
       'salta': {
         name: 'Salta',
@@ -828,7 +837,7 @@
       },
       'san-luis': {
         name: 'San Luis',
-        url: 'https://sanluis.padron.gob.ar/'
+        url: 'https://sanluis.padron.gov.ar/'
       },
       'santa-cruz': {
         name: 'Santa Cruz',
@@ -865,7 +874,7 @@
         const searchInput = d3.select("#search");
         const controlsDiv = d3.select("#controls"); // Main search container
         const globeContainer = d3.select("#globe-container");
-        const provinceSearchInput = d3.select("#province-search");
+        const provinceSearchInput = d3.select("#province-search"); // <-- AHORA ES UN <SELECT>
         const provinceSearchContainer = d3.select("#province-search-container"); // Province search container
         const titleContainer = d3.select("#title-container"); // Title container
         const headerContentDiv = d3.select("#header-content"); // Container for title and controls
@@ -1103,6 +1112,8 @@
                         selectCountry(parseInt(countryIdAttr, 10)); // Then select the country
                     });
             } else if (itemType === 'province') {
+                 // Esta lógica ya no se usa, se mantiene por si acaso pero
+                 // la selección de provincia ahora usa un <select> nativo.
                  listItems.attr("data-province-code", d => d.code)
                     .on("click", function() {
                         const provinceCode = d3.select(this).attr("data-province-code");
@@ -1386,7 +1397,26 @@
             if (countryCode === "AR") {
                 console.log("Country is Argentina, showing provinces section."); // Debugging log
                 argentinaProvincesContainer.style("display", "block"); // Show section
-                // Province dropdown is populated on load
+                
+                // --- INICIO: Poblar el <select> de provincias ---
+                // Limpiar opciones existentes (excepto la primera)
+                provinceSearchInput.selectAll("option:not(:first-child)").remove();
+                
+                // Ordenar provincias alfabéticamente
+                const sortedProvinces = Object.entries(argentinaProvincesData)
+                                          .map(([code, info]) => ({ code: code, name: info.name }))
+                                          .sort((a, b) => a.name.localeCompare(b.name));
+
+                // Añadir nuevas opciones
+                sortedProvinces.forEach(province => {
+                    provinceSearchInput.append("option")
+                        .attr("value", province.code)
+                        .text(province.name);
+                });
+                
+                // Resetear valor
+                provinceSearchInput.property('value', '');
+                // --- FIN: Poblar el <select> de provincias ---
             }
 
             // Show the panel using class for transition
@@ -1522,41 +1552,16 @@
          });
 
 
-        // Handle focus on province search input (for Argentina) to show modal
-        provinceSearchInput.on("focus", function() {
-             console.log("Province search input focused. Showing province modal."); // Debugging log
-             // Ensure main controls stay active (should already be if Argentina is selected)
-             body.classed("controls-active", true); // Ensure it stays active
-            // Get list of provinces for modal
-            const provincesForModal = Object.entries(argentinaProvincesData)
-                                      .map(([code, info]) => ({ code: code, name: info.name }))
-                                      .sort((a, b) => a.name.localeCompare(b.name));
-            showModal("Buscar provincia", provincesForModal, 'province');
+        // Handle change on province select dropdown (for Argentina)
+        provinceSearchInput.on("change", function() {
+            const selectedCode = d3.select(this).property("value");
+            console.log("Province selected:", selectedCode); // Debugging log
+            if (selectedCode) {
+                updateProvinceLink(selectedCode);
+            } else {
+                provinceLinksContainer.html(''); // Clear if default option selected
+            }
         });
-
-         // Handle click on province search input to show modal
-         provinceSearchInput.on("click", function() {
-             console.log("Province search input clicked. Showing province modal."); // Debugging log
-             // Ensure main controls stay active
-             body.classed("controls-active", true); // Ensure it stays active
-             // Get list of provinces for modal
-             const provincesForModal = Object.entries(argentinaProvincesData)
-                                       .map(([code, info]) => ({ code: code, name: info.name }))
-                                       .sort((a, b) => a.name.localeCompare(b.name));
-             showModal("Buscar provincia", provincesForModal, 'province');
-         });
-
-         // Handle blur on province search input
-         provinceSearchInput.on("blur", function() {
-             // Use a small timeout
-             setTimeout(() => {
-                 // If the modal is hidden AND the input is now blurred
-                 // No need to change controls-active based on province input blur
-                 if (!modalContainer.classed("visible") && document.activeElement !== provinceSearchInput.node()) {
-                     // console.log("Province input blurred");
-                 }
-             }, 150);
-         });
 
 
         // Handle click on modal close button
