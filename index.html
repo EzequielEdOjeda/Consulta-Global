@@ -8,6 +8,7 @@
     <style>
         body {
             font-family: sans-serif;
+			-webkit-tap-highlight-color: transparent;
             margin: 0;
             padding: 0;
             background-color: #000000; /* Fondo negro */
@@ -15,180 +16,207 @@
             display: flex;
             flex-direction: column; /* Layout en columna */
             align-items: center; /* Centrar horizontalmente */
-            justify-content: flex-start; /* Alinear al inicio, el centrado inicial se hace con posicionamiento absoluto */
+            justify-content: flex-start; /* Alinear al inicio */
             height: 100vh;
             overflow: hidden; /* Evitar scrollbars */
-            position: relative; /* Necesario para posicionamiento absoluto de #header-content y otros elementos flotantes */
+            position: relative;
         }
+
+        /* --- LOADER STYLES (NUEVO) --- */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            z-index: 9999; /* Por encima de todo */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00ffff;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 15px;
+        }
+
+        .loading-text {
+            color: #00ffff;
+            font-size: 1.2em;
+            letter-spacing: 2px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        /* Clase para ocultar el loader */
+        #loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        /* --- FIN LOADER STYLES --- */
 
         /* Contenedor principal para el título y controles */
         #header-content {
-            position: absolute; /* Posicionamiento absoluto para centrar inicialmente */
-            top: 50%; /* Centrar verticalmente */
-            left: 50%; /* Centrar horizontalmente */
-            transform: translate(-50%, -50%); /* Ajustar para centrar el elemento */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             display: flex;
-            flex-direction: column; /* Por defecto en columna */
+            flex-direction: column;
             align-items: center;
-            /* Transición suave para el movimiento - Aumentada duración */
             transition: top 0.7s ease-in-out, transform 0.7s ease-in-out, margin-top 0.7s ease-in-out;
-            z-index: 20; /* Asegurar que esté por encima del globo */
-            background-color: transparent; /* Fondo completamente transparente */
-            width: auto; /* Permitir que el ancho se ajuste al contenido */
-            max-width: 95%; /* Evitar que se desborde en pantallas pequeñas */
-            padding: 10px; /* Añadir padding para espacio en los bordes */
-            box-sizing: border-box; /* Incluir padding en el ancho */
+            z-index: 20;
+            background-color: transparent;
+            width: auto;
+            max-width: 95%;
+            padding: 10px;
+            box-sizing: border-box;
         }
 
-        /* Estilo para el contenedor del título principal */
         #title-container {
-            margin-bottom: 20px; /* Espacio entre título y buscador por defecto */
-             /* Transición suave - Aumentada duración */
+            margin-bottom: 20px;
             transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
-            pointer-events: none; /* Permitir clics a través */
+            pointer-events: none;
             text-align: center;
-            flex-shrink: 0; /* Evitar que el título se encoja */
-            opacity: 1; /* Visible by default */
-            transform: translateY(0); /* Initial position */
+            flex-shrink: 0;
+            opacity: 1;
+            transform: translateY(0);
         }
 
         #main-title {
-            font-size: 2.5em; /* Título grande */
+            font-size: 2.5em;
             font-weight: bold;
-            color: #00ffff; /* Color cian llamativo */
-            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5); /* Sutil brillo */
-            margin: 0; /* Eliminar margen por defecto */
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            margin: 0;
         }
 
-        /* Estilo para el body cuando un país está seleccionado o buscador activo */
         body.controls-active #header-content {
-            position: absolute; /* Mantener absoluto para que flote */
-            top: -5px; /* Mover a 15px del borde superior (más arriba) */
-            left: 50%; /* Mantener centrado horizontalmente */
-            transform: translateX(-50%); /* Ajustar para centrar horizontalmente */
-            margin-top: 0; /* Asegurar que no haya margen superior adicional */
-            width: 95%; /* Usar ancho relativo cuando está activo */
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 0;
+            width: 95%;
         }
 
-        /* Ocultar el título cuando los controles están activos */
         body.controls-active #title-container {
             opacity: 0;
-            transform: translateY(-25px); /* Mover hacia arriba un poco más mientras se desvanece */
-            pointer-events: none; /* Asegurar que no sea interactivo cuando está oculto */
+            transform: translateY(-25px);
+            pointer-events: none;
         }
 
-        /* Estilo para el contenedor del buscador */
         #controls {
-            padding: 0; /* Eliminar padding */
-            background-color: transparent; /* Fondo transparente */
-            backdrop-filter: none; /* Eliminar blur */
+            padding: 0;
+            background-color: transparent;
+            backdrop-filter: none;
             border-radius: 5px;
-            box-shadow: none; /* Eliminar sombra */
+            box-shadow: none;
             display: flex;
             gap: 10px;
             align-items: center;
-            border: none; /* Eliminar borde */
-            position: relative; /* Necesario para posicionar el dropdown (aunque ahora usamos modal) */
-            /* La transición de posición se maneja en #header-content */
-            width: 100%; /* Asegurar que ocupe el ancho disponible en el contenedor padre (#header-content) */
-            justify-content: center; /* Centrar el contenido del controls div */
+            border: none;
+            position: relative;
+            width: 100%;
+            justify-content: center;
         }
 
-        /* Estilo para el input del buscador principal */
         #search {
-            padding: 12px 20px; /* Aumentar padding */
-            border: 1px solid rgba(255, 255, 255, 0.3); /* Borde sutil */
-            background-color: rgba(255, 255, 255, 0); /* Fondo completamente transparente al inicio */
+            padding: 12px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background-color: rgba(255, 255, 255, 0);
             color: #f0f0f0;
-            border-radius: 30px; /* Más redondeado */
-            font-size: 1.1em; /* Fuente ligeramente más grande */
-            outline: none; /* Eliminar outline por defecto */
-            transition: background-color 0.3s ease, box-shadow 0.3s ease, width 0.3s ease, border-color 0.3s ease; /* Transiciones */
-            width: 250px; /* Ancho inicial */
-            text-align: center; /* Centrar texto */
-            cursor: pointer; /* Indicar que es clickable */
-            box-sizing: border-box; /* Incluir padding y borde en el ancho */
+            border-radius: 30px;
+            font-size: 1.1em;
+            outline: none;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, width 0.3s ease, border-color 0.3s ease;
+            width: 250px;
+            text-align: center;
+            cursor: pointer;
+            box-sizing: border-box;
         }
 
         #search::placeholder {
             color: #aaa;
-            text-align: center; /* Centrar placeholder */
+            text-align: center;
         }
 
-         /* Ajustar alineación del texto cuando hay contenido */
          #search:not(:placeholder-shown) {
              text-align: left;
-             /* Estilo de fondo cuando el input tiene texto - Aumentado opacidad */
-             background-color: rgba(255, 255, 255, 0.3); /* Fondo un poco más visible */
+             background-color: rgba(255, 255, 255, 0.3);
          }
 
-        /* Estilo para el input del buscador principal al enfocar */
         #search:focus {
-            background-color: rgba(255, 255, 255, 0.4); /* Fondo aún más visible al enfocar */
-            box-shadow: 0 0 12px rgba(0, 255, 255, 0.8); /* Brillo cian al enfocar */
-            border-color: #00ffff; /* Borde cian al enfocar */
-            width: 300px; /* Expandir ancho al enfocar */
-            text-align: left; /* Alinear texto a la izquierda al enfocar */
-        }
-
-        /* Ocultar el botón de restablecer vista */
-        #reset-button {
-            display: none;
+            background-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.8);
+            border-color: #00ffff;
+            width: 300px;
+            text-align: left;
         }
 
         #globe-container {
-            flex-grow: 1; /* Ocupa el espacio restante */
+            flex-grow: 1;
             width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative; /* Necesario para posicionar el panel de info */
-            overflow: hidden; /* Evita problemas de overflow del SVG */
+            position: relative;
+            overflow: hidden;
         }
 
         #globe {
-            /* Dejar que JS controle el tamaño basado en el contenedor */
             max-width: 100%;
             max-height: 100%;
-            /* El cursor se establece en JS según la clase data-available */
         }
 
-        /* Color de tierra por defecto para países NO en los datos */
         .land {
-            fill: #444; /* Gris oscuro */
-            stroke: #222; /* Bordes más oscuros */
+            fill: #444;
+            stroke: #222;
             stroke-width: 0.4px;
             transition: fill 0.2s ease;
-            cursor: default; /* Cursor por defecto para países no interactivos */
+            cursor: default;
         }
 
-        /* Color de tierra para países que SÍ están en los datos */
         .land.data-available {
-            fill: #b8b8b8; /* Tierra gris más brillante */
-            stroke: #444; /* Bordes ligeramente más claros */
-            cursor: pointer; /* Cursor de puntero para países interactivos */
+            fill: #b8b8b8;
+            stroke: #444;
+            cursor: pointer;
         }
 
-        /* Efecto hover para países NO en los datos */
         .land:not(.data-available):hover {
-             fill: #555; /* Gris oscuro ligeramente más claro en hover */
+             fill: #555;
         }
 
-        /* Efecto hover para países que SÍ están en los datos */
         .land.data-available:hover {
-            fill: #cccccc; /* Gris más claro en hover */
+            fill: #cccccc;
         }
 
-        /* Color del país seleccionado (anula el fill de data-available) */
         .land.selected {
-            fill: #00ffff; /* Resaltado cian para el seleccionado */
+            fill: #00ffff;
              stroke: #fff;
              stroke-width: 0.6px;
         }
 
-        /* Definir la apariencia del agua */
         .water {
-             fill: #0077be; /* Azul vibrante */
+             fill: #0077be;
              filter: url(#ocean-glow);
         }
 
@@ -196,121 +224,111 @@
             position: absolute;
             bottom: 20px;
             right: 20px;
-            background-color: rgba(0, 0, 20, 0.8); /* Oscuro semi-transparente */
-            backdrop-filter: blur(8px); /* Más blur */
-            border: 1px solid rgba(255, 255, 255, 0.2); /* Borde ajustado para tema oscuro */
+            background-color: rgba(0, 0, 20, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             max-width: 250px;
             z-index: 10;
-            transition: opacity 0.4s ease-out, transform 0.4s ease-out; /* Animación de salida más suave */
-            color: #e0e0e0; /* Color de texto claro para panel oscuro */
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            color: #e0e0e0;
             transform: translateY(10px);
-            opacity: 0; /* Iniciar oculto */
-            display: none; /* Iniciar oculto */
-            /* Flexbox para mejor control del layout interno */
-            display: flex;
+            opacity: 0;
+            display: none;
             flex-direction: column;
-            align-items: center; /* Centrar contenido */
+            align-items: center;
         }
 
         #info-panel.visible {
              opacity: 1;
              transform: translateY(0);
-             display: flex; /* Hacer visible */
+             display: flex;
         }
 
-        /* Contenedor para el nombre del país y la hora local */
         #country-header {
-            display: flex; /* Usar flexbox */
-            flex-direction: column; /* Nombre y hora en columna en panel */
-            align-items: center; /* Centrar texto */
-            width: 100%; /* Ocupar ancho completo del panel */
-            margin-bottom: 10px; /* Espacio debajo del encabezado */
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3); /* Borde debajo */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
             padding-bottom: 10px;
-            text-align: center; /* Asegurar centrado */
+            text-align: center;
         }
 
         #country-name {
-            margin: 0 0 5px 0; /* Espacio debajo del nombre */
-            font-size: 1.4em; /* Aumentar tamaño del nombre */
-            font-weight: bold; /* Negrita para el nombre */
-            color: #fff; /* Encabezado blanco */
-            word-break: break-word; /* Romper palabras largas si es necesario */
+            margin: 0 0 5px 0;
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #fff;
+            word-break: break-word;
         }
 
-        /* Estilo para la hora local */
         #local-time {
-            font-size: 1em; /* Aumentar tamaño de la hora */
-            color: #00ffff; /* Color cian para la hora */
-            font-weight: bold; /* Texto en negrita */
-            margin: 0; /* Eliminar margen por defecto */
-            text-align: center; /* Alinear hora al centro */
-            padding: 4px 8px; /* Pequeño padding para el fondo */
-            background-color: rgba(0, 255, 255, 0.1); /* Fondo semi-transparente cian */
-            border-radius: 4px; /* Bordes redondeados */
+            font-size: 1em;
+            color: #00ffff;
+            font-weight: bold;
+            margin: 0;
+            text-align: center;
+            padding: 4px 8px;
+            background-color: rgba(0, 255, 255, 0.1);
+            border-radius: 4px;
         }
 
-        /* Contenedor para la bandera */
         #flag-container {
-            margin-bottom: 15px; /* Más espacio debajo de la bandera */
+            margin-bottom: 15px;
             text-align: center;
-            height: 50px; /* Altura fija para bandera */
+            height: 50px;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 10px; /* Added space above the flag */
-            width: 100%; /* Ocupar ancho completo para centrado */
+            margin-top: 10px;
+            width: 100%;
         }
-         /* Estilo para la imagen de la bandera */
          #flag-container img {
-            max-width: 80px; /* Limitar ancho de bandera */
-            max-height: 50px; /* Limitar altura de bandera */
+            max-width: 80px;
+            max-height: 50px;
             height: auto;
-            border: 1px solid rgba(255,255,255,0.3); /* Borde ajustado para tema oscuro */
-            background-color: rgba(255,255,255,0.1); /* Ligero fondo para banderas */
-            object-fit: contain; /* Asegurar que se mantenga la relación de aspecto */
+            border: 1px solid rgba(255,255,255,0.3);
+            background-color: rgba(255,255,255,0.1);
+            object-fit: contain;
          }
-         /* Estilo para placeholder/emoji de bandera */
          #flag-container span {
-            font-size: 40px; /* Hacer los emojis de bandera más grandes */
+            font-size: 40px;
          }
 
-        /* Contenedor para enlaces generales del país */
         #links-container {
-             width: 100%; /* Ocupar ancho completo del panel */
-             text-align: center; /* Centrar enlaces */
+             width: 100%;
+             text-align: center;
         }
         #links-container a {
             display: block;
-            margin-bottom: 8px; /* Espaciado aumentado */
-            color: #66bfff; /* Azul más claro para enlaces */
+            margin-bottom: 8px;
+            color: #66bfff;
             text-decoration: none;
             font-size: 0.9em;
-            word-wrap: break-word; /* Evitar que enlaces largos se desborden */
+            word-wrap: break-word;
         }
 
         #links-container a:hover {
             text-decoration: underline;
-            color: #99dfff; /* Aún más claro en hover */
+            color: #99dfff;
         }
 
-        /* Contenedor específico para provincias de Argentina */
         #argentina-provinces {
             margin-top: 15px;
             padding-top: 10px;
             border-top: 1px solid rgba(255, 255, 255, 0.2);
-            display: none; /* Oculto por defecto */
-            width: 100%; /* Ocupar ancho completo del panel */
+            display: none;
+            width: 100%;
         }
 
-        /* Estilo para el contenedor del input de búsqueda de provincias */
         #province-search-container {
-            margin-bottom: 10px; /* Espacio debajo del buscador */
-            position: relative; /* Necesario para posicionar el dropdown */
-            width: 100%; /* Ocupar ancho completo */
+            margin-bottom: 10px;
+            position: relative;
+            width: 100%;
         }
 
         #province-search-container label {
@@ -319,42 +337,37 @@
              font-weight: bold;
              font-size: 0.9em;
              color: #ccc;
-             text-align: left; /* Alinear label a la izquierda */
+             text-align: left;
         }
 
-        /* Estilo para el SELECT del buscador de provincias */
         #province-search {
-            width: 100%; /* Ocupar ancho completo */
-            padding: 10px 8px; /* Padding (selects manejan padding diferente) */
+            width: 100%;
+            padding: 10px 8px;
             border: 1px solid #555;
             border-radius: 3px;
             background-color: rgba(0,0,0, 0.3);
             color: #f0f0f0;
             outline: none;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer; /* Indicar que es clickable */
-            box-sizing: border-box; /* Incluir padding y borde en el ancho */
-            font-size: 0.9em; /* Heredar tamaño de fuente */
-            /* Permitir apariencia nativa para mejor UX móvil */
+            cursor: pointer;
+            box-sizing: border-box;
+            font-size: 0.9em;
         }
-        /* Estilo para las opciones (importante en modo oscuro) */
         #province-search option {
-             background-color: #222; /* Fondo oscuro para dropdown */
-             color: #f0f0f0; /* Texto claro */
+             background-color: #222;
+             color: #f0f0f0;
         }
 
-        /* Estilo para el input del buscador de provincias al enfocar */
         #province-search:focus {
              border-color: #007bff;
              box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
         }
 
-        /* Contenedor para enlaces específicos de provincias */
         #province-links-container {
-            min-height: 20px; /* Asegurar espacio aunque no se muestre enlace inicialmente */
-            margin-bottom: 10px; /* Espacio debajo del enlace de provincia */
-            width: 100%; /* Ocupar ancho completo */
-            text-align: center; /* Centrar enlaces */
+            min-height: 20px;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
         }
 
         #province-links-container a {
@@ -371,10 +384,9 @@
             color: #99dfff;
         }
 
-        /* Contenedor nacionales (siempre visible cuando Argentina está seleccionada) */
         .national-links {
-             width: 100%; /* Ocupar ancho completo */
-             text-align: center; /* Centrar enlaces */
+             width: 100%;
+             text-align: center;
         }
         .national-links h3 {
             margin-top: 0;
@@ -395,55 +407,50 @@
             color: #99dfff;
         }
 
-        /* Modal Background */
         #modal-background {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
-            z-index: 30; /* Above header and globe */
-            display: none; /* Hidden by default */
-            backdrop-filter: blur(5px); /* Optional blur effect */
-            transition: opacity 0.3s ease; /* Add transition for fade */
-            opacity: 0; /* Start transparent */
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 30;
+            display: none;
+            backdrop-filter: blur(5px);
+            transition: opacity 0.3s ease;
+            opacity: 0;
         }
         #modal-background.visible {
             display: block;
             opacity: 1;
         }
 
-
-        /* Modal Container */
         #modal-container {
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) scale(0.95); /* Start slightly smaller */
-            background-color: rgba(30, 30, 30, 0.98); /* Darker, less transparent */
+            transform: translate(-50%, -50%) scale(0.95);
+            background-color: rgba(30, 30, 30, 0.98);
             border: 1px solid #00ffff;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
-            z-index: 40; /* Above modal background */
-            display: none; /* Hidden by default */
-            width: 90%; /* Responsive width */
-            max-width: 400px; /* Max width */
+            z-index: 40;
+            display: none;
+            width: 90%;
+            max-width: 400px;
             padding: 20px;
             box-sizing: border-box;
             flex-direction: column;
             gap: 15px;
-            transition: opacity 0.3s ease, transform 0.3s ease; /* Add transition */
-            opacity: 0; /* Start transparent */
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 0;
         }
         #modal-container.visible {
              display: flex;
              opacity: 1;
-             transform: translate(-50%, -50%) scale(1); /* Scale to normal size */
+             transform: translate(-50%, -50%) scale(1);
         }
 
-
-        /* Modal Header */
         #modal-header {
             display: flex;
             justify-content: space-between;
@@ -469,16 +476,15 @@
         }
 
         #modal-close:hover {
-            color: #ff0000; /* Red on hover */
+            color: #ff0000;
         }
 
-        /* Modal Search Input */
         #modal-search-input {
             width: 100%;
             padding: 10px 15px;
             border: 1px solid #555;
             border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0.1); /* Slightly visible background */
+            background-color: rgba(255, 255, 255, 0.1);
             color: #f0f0f0;
             outline: none;
             box-sizing: border-box;
@@ -490,21 +496,19 @@
             box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
         }
 
-        /* Modal List Container (now uses .dropdown-list class) */
         #modal-list.dropdown-list {
-            flex-grow: 1; /* Take available space */
-            max-height: 200px; /* Max height before scroll */
-            overflow-y: auto; /* Add scroll */
+            flex-grow: 1;
+            max-height: 200px;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 5px; /* Space between buttons */
-            padding: 0; /* Remove padding added by .dropdown-list style */
-            border: none; /* Remove border added by .dropdown-list style */
-            background-color: transparent; /* Remove background added by .dropdown-list style */
-            box-shadow: none; /* Remove shadow added by .dropdown-list style */
+            gap: 5px;
+            padding: 0;
+            border: none;
+            background-color: transparent;
+            box-shadow: none;
         }
 
-        /* Style for buttons inside modal list (similar to previous dropdown buttons) */
         #modal-list.dropdown-list button {
             display: block;
             width: 100%;
@@ -516,7 +520,7 @@
             cursor: pointer;
             transition: background-color 0.2s ease, color 0.2s ease;
             font-size: 1em;
-            border-radius: 5px; /* Rounded corners for buttons */
+            border-radius: 5px;
         }
 
         #modal-list.dropdown-list button:hover {
@@ -527,114 +531,117 @@
 
         /* Ajustes responsivos */
         @media (max-width: 600px) {
-            /* Ajustar #header-content para layout en columna en móviles */
             #header-content {
-                /* Initial positioning remains the same */
-                width: 95%; /* Usar un ancho relativo para empezar */
-                padding: 10px; /* Asegurar padding */
-                flex-direction: column; /* Título y buscador en columna */
-                align-items: center; /* Centrar horizontalmente */
-                max-width: 100%; /* Asegurar que no haya max-width que lo limite */
+                width: 95%;
+                padding: 10px;
+                flex-direction: column;
+                align-items: center;
+                max-width: 100%;
             }
 
             #title-container {
-                margin-bottom: 10px; /* Espacio debajo del título */
-                margin-right: 0; /* Eliminar margen a la derecha */
-                text-align: center; /* Centrar texto del título */
-                width: 100%; /* Ocupar todo el ancho disponible */
+                margin-bottom: 10px;
+                margin-right: 0;
+                text-align: center;
+                width: 100%;
             }
 
             #main-title {
-                font-size: 1.5em; /* Título más pequeño en pantallas pequeñas */
-                white-space: normal; /* Permitir que el título se envuelva si es necesario */
-                overflow: visible; /* Permitir que el contenido se muestre */
-                text-overflow: clip; /* Evitar elipsis */
-                max-width: 100%; /* Permitir que el título ocupe el ancho completo */
+                font-size: 1.5em;
+                white-space: normal;
+                overflow: visible;
+                text-overflow: clip;
+                max-width: 100%;
             }
 
             #controls {
-                flex-direction: column; /* Asegurar que los elementos dentro de controls estén en columna */
-                align-items: stretch; /* Estirar elementos para ocupar el ancho completo */
-                gap: 5px; /* Reducir espacio entre elementos dentro de controls si los hubiera */
-                width: 100%; /* Ocupar todo el ancho disponible */
-                flex-grow: 0; /* No permitir que controls crezca */
-                justify-content: center; /* Centrar el contenido de controls */
+                flex-direction: column;
+                align-items: stretch;
+                gap: 5px;
+                width: 100%;
+                flex-grow: 0;
+                justify-content: center;
             }
 
             #search {
-                 width: 100%; /* Ocupar todo el ancho disponible */
-                 flex-grow: 0; /* No permitir que el input crezca */
-                 max-width: none; /* Eliminar límite de ancho máximo */
-                 font-size: 0.9em; /* Fuente ligeramente más pequeña */
-                 padding: 8px 12px; /* Reducir padding */
-                 text-align: center; /* Centrar texto por defecto en móvil */
+                 width: 100%;
+                 flex-grow: 0;
+                 max-width: none;
+                 font-size: 0.9em;
+                 padding: 8px 12px;
+                 text-align: center;
             }
              #search::placeholder {
-                 text-align: center; /* Centrar placeholder en móvil */
+                 text-align: center;
              }
 
             #search:focus {
-                 width: 100%; /* Ocupar todo el ancho disponible al enfocar */
-                 max-width: none; /* Eliminar límite de ancho máximo al enfocar */
-                 text-align: left; /* Alinear texto a la izquierda al enfocar */
+                 width: 100%;
+                 max-width: none;
+                 text-align: left;
             }
 
-            /* Ajuste para pantallas pequeñas cuando los controles están activos */
              body.controls-active #header-content {
-                position: absolute; /* Mantener absoluto cuando está activo */
-                top: 10px; /* Mover a 10px del borde superior en pantallas pequeñas */
-                left: 50%; /* Mantener centrado horizontalmente */
-                transform: translateX(-50%); /* Ajustar para centrar horizontalmente */
-                width: 95%; /* Usar ancho relativo cuando está activo */
-                flex-direction: column; /* Mantener en columna */
-                align-items: center; /* Mantener alineación */
-                justify-content: center; /* Centrar el buscador cuando está activo */
+                position: absolute;
+                top: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 95%;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
              }
 
-             /* Asegurar que el título esté oculto cuando controls-active está en móvil */
              body.controls-active #title-container {
-                 display: none; /* Ocultar completamente el título */
+                 display: none;
              }
 
-            /* Ajustes para el panel de información en móviles */
             #info-panel {
-                bottom: 10px; /* Ajustado para pantallas pequeñas */
-                right: 10px; /* Ajustado para pantallas pequeñas */
-                left: 10px; /* Añadido para ocupar ancho en móviles */
-                max-width: none; /* Eliminar max-width en móviles */
-                width: auto; /* Permitir que el ancho se ajuste al contenido */
-                padding: 10px;
-                /* Asegurar que el contenido interno se centre y ajuste */
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                width: auto;
+                padding: 15px; /* Un poco más de padding para que respire */
                 align-items: center;
             }
 
+            /* --- MODIFICACIÓN MÓVIL PARA PAÍS Y HORA --- */
             #country-header {
-                flex-direction: column; /* Nombre y hora en columna */
-                align-items: center; /* Centrar texto */
-                padding-bottom: 8px; /* Reducir padding */
-                margin-bottom: 8px; /* Reducir margen */
+                flex-direction: row; /* Cambiado de column a row */
+                justify-content: space-between; /* Extremos opuestos */
+                align-items: center; /* Alineación vertical */
+                padding-bottom: 8px;
+                margin-bottom: 8px;
+                width: 100%;
             }
 
             #country-name {
-                font-size: 1.2em; /* Reducir tamaño del nombre */
-                margin-bottom: 3px; /* Reducir margen */
+                font-size: 1.2em;
+                margin-bottom: 0; /* Sin margen inferior */
+                text-align: left; /* Alinear a la izquierda */
+                flex: 1; /* Que ocupe espacio disponible */
+                margin-right: 10px; /* Separación con la hora */
             }
 
             #local-time {
-                font-size: 0.9em; /* Reducir tamaño de la hora */
-                padding: 2px 5px; /* Reducir padding */
+                font-size: 0.9em;
+                padding: 4px 8px;
+                margin: 0;
+                white-space: nowrap; /* Que no se rompa la línea de la hora */
             }
+            /* --- FIN MODIFICACIÓN --- */
 
             #flag-container {
-                height: 40px; /* Ajustar altura de bandera */
-                margin-bottom: 10px; /* Ajustar margen */
+                height: 40px;
+                margin-bottom: 10px;
             }
              #flag-container img {
-                max-width: 60px; /* Ajustar ancho de bandera */
-                max-height: 40px; /* Ajustar altura de bandera */
+                max-width: 60px;
+                max-height: 40px;
              }
              #flag-container span {
-                font-size: 30px; /* Ajustar tamaño de emoji */
+                font-size: 30px;
              }
 
             #links-container a,
@@ -646,23 +653,22 @@
                 font-size: 0.8em;
             }
 
-             /* Ajustar modal para móviles */
              #modal-container {
-                 width: 95%; /* Usar más ancho en móviles */
-                 padding: 15px; /* Reducir padding */
+                 width: 95%;
+                 padding: 15px;
              }
 
              #modal-title {
-                 font-size: 1.2em; /* Reducir tamaño del título del modal */
+                 font-size: 1.2em;
              }
 
              #modal-search-input {
-                 padding: 8px 12px; /* Reducir padding */
+                 padding: 8px 12px;
              }
 
              #modal-list.dropdown-list button {
-                 padding: 8px 12px; /* Reducir padding en botones del modal */
-                 font-size: 0.9em; /* Reducir tamaño de fuente */
+                 padding: 8px 12px;
+                 font-size: 0.9em;
              }
         }
 
@@ -678,12 +684,17 @@
     </script>
 </head>
 <body>
+    <div id="loader">
+        <div class="spinner"></div>
+        <div class="loading-text">CARGANDO...</div>
+    </div>
+
     <div id="header-content">
         <div id="title-container">
             <h1 id="main-title">¿Dónde Voto?</h1>
         </div>
         <div id="controls">
-            <input type="text" id="search" placeholder="Buscar país..." readonly>
+            <input type="text" id="search" placeholder="Buscar País..." readonly>
             </div>
     </div>
 
@@ -736,26 +747,25 @@
         // Only countries in this list will be interactive and have data displayed.
         const countriesData = [
           { id: 32, name: "Argentina", nameEs: "Argentina", lat: -34.6037, lon: -58.3816, code: "AR", electoralUrl: "https://www.padron.gob.ar/", flagUrl: "https://flagcdn.com/w80/ar.png", timezone: "America/Argentina/Buenos_Aires" },
-          { id: 840, name: "United States", nameEs: "Estados Unidos", lat: 37.0902, lon: -95.7129, code: "US", electoralUrl: "https://www.usa.gov/register-to-vote", flagUrl: "https://flagcdn.com/w80/us.png", timezone: "America/New_York" }, // Example timezone
-          { id: 76, name: "Brazil", nameEs: "Brasil", lat: -15.7801, lon: -47.9292, code: "BR", electoralUrl: "https://www.tse.jus.br/eleitor/titulo-e-local-de-votacao/consulta-por-nome", flagUrl: "https://flagcdn.com/w80/br.png", timezone: "America/Sao_Paulo" }, // Example timezone
-          { id: 124, name: "Canada", nameEs: "Canadá", lat: 56.1304, lon: -106.3468, code: "CA", electoralUrl: "https://www.elections.ca/content.aspx?section=vot&dir=reg&document=index&lang=e", flagUrl: "https://flagcdn.com/w80/ca.png", timezone: "America/Toronto" }, // Example timezone
-          { id: 484, name: "Mexico", nameEs: "México", lat: 23.6345, lon: -102.5528, code: "MX", electoralUrl: "https://listanominal.ine.mx/", flagUrl: "https://flagcdn.com/w80/mx.png", timezone: "America/Mexico_City" }, // Example timezone
+          { id: 840, name: "United States", nameEs: "Estados Unidos", lat: 37.0902, lon: -95.7129, code: "US", electoralUrl: "https://www.usa.gov/register-to-vote", flagUrl: "https://flagcdn.com/w80/us.png", timezone: "America/New_York" }, 
+          { id: 76, name: "Brazil", nameEs: "Brasil", lat: -15.7801, lon: -47.9292, code: "BR", electoralUrl: "https://www.tse.jus.br/eleitor/titulo-e-local-de-votacao/consulta-por-nome", flagUrl: "https://flagcdn.com/w80/br.png", timezone: "America/Sao_Paulo" }, 
+          { id: 124, name: "Canada", nameEs: "Canadá", lat: 56.1304, lon: -106.3468, code: "CA", electoralUrl: "https://www.elections.ca/content.aspx?section=vot&dir=reg&document=index&lang=e", flagUrl: "https://flagcdn.com/w80/ca.png", timezone: "America/Toronto" }, 
+          { id: 484, name: "Mexico", nameEs: "México", lat: 23.6345, lon: -102.5528, code: "MX", electoralUrl: "https://listanominal.ine.mx/", flagUrl: "https://flagcdn.com/w80/mx.png", timezone: "America/Mexico_City" }, 
           { id: 826, name: "United Kingdom", nameEs: "Reino Unido", lat: 55.3781, lon: -3.4360, code: "GB", electoralUrl: "https://www.gov.uk/register-to-vote", flagUrl: "https://flagcdn.com/w80/gb.png", timezone: "Europe/London" },
           { id: 250, name: "France", nameEs: "Francia", lat: 46.2276, lon: 2.2137, code: "FR", electoralUrl: "https://www.service-public.fr/particuliers/vosdroits/R16396", flagUrl: "https://flagcdn.com/w80/fr.png", timezone: "Europe/Paris" },
           { id: 276, name: "Germany", nameEs: "Alemania", lat: 51.1657, lon: 10.4515, code: "DE", electoralUrl: "https://www.bundeswahlleiter.de/en/bundestagswahlen/2021.html", flagUrl: "https://flagcdn.com/w80/de.png", timezone: "Europe/Berlin" },
           { id: 724, name: "Spain", nameEs: "España", lat: 40.4637, lon: -3.7492, code: "ES", electoralUrl: "https://sede.ine.gob.es/consulta_electoral_elecciones", flagUrl: "https://flagcdn.com/w80/es.png", timezone: "Europe/Madrid" },
           { id: 380, name: "Italy", nameEs: "Italia", lat: 41.8719, lon: 12.5674, code: "IT", electoralUrl: "https://dait.interno.gov.it/elezioni", flagUrl: "https://flagcdn.com/w80/it.png", timezone: "Europe/Rome" },
-          { id: 36, name: "Australia", nameEs: "Australia", lat: -25.2744, lon: 133.7751, code: "AU", electoralUrl: "https://www.aec.gov.au/check-enrolment/", flagUrl: "https://flagcdn.com/w80/au.png", timezone: "Australia/Sydney" }, // Example timezone
+          { id: 36, name: "Australia", nameEs: "Australia", lat: -25.2744, lon: 133.7751, code: "AU", electoralUrl: "https://www.aec.gov.au/check-enrolment/", flagUrl: "https://flagcdn.com/w80/au.png", timezone: "Australia/Sydney" }, 
           { id: 392, name: "Japan", nameEs: "Japón", lat: 36.2048, lon: 138.2529, code: "JP", electoralUrl: "https://www.soumu.go.jp/senkyo/index.html", flagUrl: "https://flagcdn.com/w80/jp.png", timezone: "Asia/Tokyo" },
-          { id: 356, name: "India", nameEs: "India", lat: 20.5937, lon: 78.9629, code: "IN", electoralUrl: "https://electoralsearch.in/", flagUrl: "https://flagcdn.com/w80/in.png", timezone: "Asia/Kolkata" }, // Corrected duplicate flagUrl
-          { id: 156, name: "China", nameEs: "China", lat: 35.8617, lon: 104.1954, code: "CN", electoralUrl: "http://www.npc.gov.cn/englishnpc/c23934/column.shtml", flagUrl: "https://flagcdn.com/w80/cn.png", timezone: "Asia/Shanghai" }, // Example timezone
-          { id: 643, name: "Russia", nameEs: "Rusia", lat: 61.5240, lon: 105.3188, code: "RU", electoralUrl: "http://www.cikrf.ru/", flagUrl: "https://flagcdn.com/w80/ru.png", timezone: "Europe/Moscow" }, // Corrected duplicate flagUrl
+          { id: 356, name: "India", nameEs: "India", lat: 20.5937, lon: 78.9629, code: "IN", electoralUrl: "https://electoralsearch.in/", flagUrl: "https://flagcdn.com/w80/in.png", timezone: "Asia/Kolkata" }, 
+          { id: 156, name: "China", nameEs: "China", lat: 35.8617, lon: 104.1954, code: "CN", electoralUrl: "http://www.npc.gov.cn/englishnpc/c23934/column.shtml", flagUrl: "https://flagcdn.com/w80/cn.png", timezone: "Asia/Shanghai" }, 
+          { id: 643, name: "Russia", nameEs: "Rusia", lat: 61.5240, lon: 105.3188, code: "RU", electoralUrl: "http://www.cikrf.ru/", flagUrl: "https://flagcdn.com/w80/ru.png", timezone: "Europe/Moscow" }, 
           { id: 710, name: "South Africa", nameEs: "Sudáfrica", lat: -30.5595, lon: 22.9375, code: "ZA", electoralUrl: "https://www.elections.org.za/pw/Voter/Voter-Information", flagUrl: "https://flagcdn.com/w80/za.png", timezone: "Africa/Johannesburg" },
           { id: 152, name: "Chile", nameEs: "Chile", lat: -35.6751, lon: -71.5430, code: "CL", electoralUrl: "https://consulta.servel.cl/", flagUrl: "https://flagcdn.com/w80/cl.png", timezone: "America/Santiago" },
           { id: 170, name: "Colombia", nameEs: "Colombia", lat: 4.5709, lon: -74.2973, code: "CO", electoralUrl: "https://wsp.registraduria.gov.co/censo/_censoResultado.php", flagUrl: "https://flagcdn.com/w80/co.png", timezone: "America/Bogota" },
           { id: 818, name: "Egypt", nameEs: "Egipto", lat: 26.8206, lon: 30.8025, code: "EG", electoralUrl: "https://www.elections.eg/", flagUrl: "https://flagcdn.com/w80/eg.png", timezone: "Africa/Cairo" },
           { id: 566, name: "Nigeria", nameEs: "Nigeria", lat: 9.0820, lon: 8.6753, code: "NG", electoralUrl: "https://inecnigeria.org/", flagUrl: "https://flagcdn.com/w80/ng.png", timezone: "Africa/Lagos" },
-          // Países agregados: Bolivia, Paraguay, Uruguay
           { id: 68, name: "Bolivia", nameEs: "Bolivia", lat: -16.2902, lon: -63.5887, code: "BO", electoralUrl: "https://yoparticipo.oep.org.bo/", flagUrl: "https://flagcdn.com/w80/bo.png", timezone: "America/La_Paz" },
           { id: 600, name: "Paraguay", nameEs: "Paraguay", lat: -23.4425, lon: -58.4438, code: "PY", electoralUrl: "https://rcp.tsje.gov.py/", flagUrl: "https://flagcdn.com/w80/py.png", timezone: "America/Asuncion" },
           { id: 858, name: "Uruguay", nameEs: "Uruguay", lat: -32.5228, lon: -55.7658, code: "UY", electoralUrl: "https://aplicaciones.corteelectoral.gub.uy/buscadorpermanente/buscadores.buscadorpermanente.aspx", flagUrl: "https://flagcdn.com/w80/uy.png", timezone: "America/Montevideo" }
@@ -763,121 +773,51 @@
 
         // Data for Argentina provinces and their electoral links
         const argentinaProvincesData = {
-          'buenos-aires': {
-        name: 'Buenos Aires',
-        url: 'https://dondevotociudad.gob.ar/'
-      },
-      'caba': {
-        name: 'CABA',
-        url: 'https://caba.padron.gov.ar/'
-      },
-      'catamarca': {
-        name: 'Catamarca',
-        url: 'https://www.eleccionescatamarca.gob.ar/'
-      },
-      'chaco': {
-        name: 'Chaco',
-        url: 'https://padron.electoralchaco.gob.ar/consulta'
-      },
-      'chubut': {
-        name: 'Chubut',
-        url: 'https://electoral.juschubut.gov.ar/'
-      },
-      'cordoba': {
-        name: 'Córdoba',
-        url: 'https://elepcba.com.ar/'
-      },
-      'corrientes': {
-        name: 'Corrientes',
-        url: 'https://www.juscorrientes.gov.ar/junta-electoral/'
-      },
-      'entre-rios': {
-        name: 'Entre Ríos',
-        url: 'https://www.tribunalelectoraler.gob.ar/'
-      },
-      'formosa': {
-        name: 'Formosa',
-        url: 'https://padron.formosa.gob.ar/'
-      },
-      'jujuy': {
-        name: 'Jujuy',
-        url: 'https://www.padronjujuy.gob.ar/'
-      },
-      'la-pampa': {
-        name: 'La Pampa',
-        url: 'https://electoral.justicialapampa.gob.ar/definitivo/atencion.aspx'
-      },
-      'la-rioja': {
-        name: 'La Rioja',
-        url: 'https://larioja.padron.gov.ar/'
-      },
-      'mendoza': {
-        name: 'Mendoza',
-        url: 'https://www.mendoza.gov.ar/padron/'
-      },
-      'misiones': {
-        name: 'Misiones',
-        url: 'https://www.electoralmisiones.gov.ar/'
-      },
-      'neuquen': {
-        name: 'Neuquén',
-        url: 'https://www.muninqn.gov.ar/padron/'
-      },
-      'rio-negro': {
-        name: 'Río Negro',
-        url: 'https://rionegro.padron.gov.ar/'
-      },
-      'salta': {
-        name: 'Salta',
-        url: 'https://www.electoralsalta.gob.ar/electores/consulta-lugar-votacion'
-      },
-      'san-juan': {
-        name: 'San Juan',
-        url: 'https://www.padron.gob.ar/'
-      },
-      'san-luis': {
-        name: 'San Luis',
-        url: 'https://sanluis.padron.gov.ar/'
-      },
-      'santa-cruz': {
-        name: 'Santa Cruz',
-        url: 'https://educacionsantacruz.gov.ar/juntaelectoral/'
-      },
-      'santa-fe': {
-        name: 'Santa Fe',
-        url: 'https://www.santafe.gov.ar/elecciones2025/consultaPadronDefinitivo/'
-      },
-      'santiago-del-estero': {
-        name: 'Santiago del Estero',
-        url: 'https://www.jussantiago.gov.ar/web/#/home'
-      },
-      'tucuman': {
-        name: 'Tucumán',
-        url: 'https://electoraltucuman.gob.ar/'
-      },
-      'tierra-del-fuego': {
-        name: 'Tierra del Fuego',
-        url: 'https://padron.justierradelfuego.gov.ar/elecciones/padron-definitivo'
-      }
+          'buenos-aires': { name: 'Buenos Aires', url: 'https://dondevotociudad.gob.ar/' },
+          'caba': { name: 'CABA', url: 'https://caba.padron.gov.ar/' },
+          'catamarca': { name: 'Catamarca', url: 'https://www.eleccionescatamarca.gob.ar/' },
+          'chaco': { name: 'Chaco', url: 'https://padron.electoralchaco.gob.ar/consulta' },
+          'chubut': { name: 'Chubut', url: 'https://electoral.juschubut.gov.ar/' },
+          'cordoba': { name: 'Córdoba', url: 'https://elepcba.com.ar/' },
+          'corrientes': { name: 'Corrientes', url: 'https://www.juscorrientes.gov.ar/junta-electoral/' },
+          'entre-rios': { name: 'Entre Ríos', url: 'https://www.tribunalelectoraler.gob.ar/' },
+          'formosa': { name: 'Formosa', url: 'https://padron.formosa.gob.ar/' },
+          'jujuy': { name: 'Jujuy', url: 'https://www.padronjujuy.gob.ar/' },
+          'la-pampa': { name: 'La Pampa', url: 'https://electoral.justicialapampa.gob.ar/definitivo/atencion.aspx' },
+          'la-rioja': { name: 'La Rioja', url: 'https://larioja.padron.gov.ar/' },
+          'mendoza': { name: 'Mendoza', url: 'https://www.mendoza.gov.ar/padron/' },
+          'misiones': { name: 'Misiones', url: 'https://www.electoralmisiones.gov.ar/' },
+          'neuquen': { name: 'Neuquén', url: 'https://www.muninqn.gov.ar/padron/' },
+          'rio-negro': { name: 'Río Negro', url: 'https://rionegro.padron.gov.ar/' },
+          'salta': { name: 'Salta', url: 'https://www.electoralsalta.gob.ar/electores/consulta-lugar-votacion' },
+          'san-juan': { name: 'San Juan', url: 'https://www.padron.gob.ar/' },
+          'san-luis': { name: 'San Luis', url: 'https://sanluis.padron.gov.ar/' },
+          'santa-cruz': { name: 'Santa Cruz', url: 'https://educacionsantacruz.gov.ar/juntaelectoral/' },
+          'santa-fe': { name: 'Santa Fe', url: 'https://www.santafe.gov.ar/elecciones2025/consultaPadronDefinitivo/' },
+          'santiago-del-estero': { name: 'Santiago del Estero', url: 'https://www.jussantiago.gov.ar/web/#/home' },
+          'tucuman': { name: 'Tucumán', url: 'https://electoraltucuman.gob.ar/' },
+          'tierra-del-fuego': { name: 'Tierra del Fuego', url: 'https://padron.justierradelfuego.gov.ar/elecciones/padron-definitivo' }
         };
 
         // --- DOM Elements ---
-        const body = d3.select("body"); // Select body to toggle classes
+        const body = d3.select("body"); 
         const svg = d3.select("#globe");
         const infoPanel = d3.select("#info-panel");
         const countryNameEl = d3.select("#country-name");
-        const localTimeEl = d3.select("#local-time"); // New element for local time
-        const flagContainer = d3.select("#flag-container"); // Flag container
+        const localTimeEl = d3.select("#local-time"); 
+        const flagContainer = d3.select("#flag-container"); 
         const linksContainer = d3.select("#links-container");
         const argentinaProvincesContainer = d3.select("#argentina-provinces");
         const provinceLinksContainer = d3.select("#province-links-container");
         const searchInput = d3.select("#search");
-        const controlsDiv = d3.select("#controls"); // Main search container
+        const controlsDiv = d3.select("#controls"); 
         const globeContainer = d3.select("#globe-container");
-        const provinceSearchInput = d3.select("#province-search"); // <-- AHORA ES UN <SELECT>
-        const provinceSearchContainer = d3.select("#province-search-container"); // Province search container
-        const titleContainer = d3.select("#title-container"); // Title container
-        const headerContentDiv = d3.select("#header-content"); // Container for title and controls
+        const provinceSearchInput = d3.select("#province-search"); 
+        const provinceSearchContainer = d3.select("#province-search-container"); 
+        const titleContainer = d3.select("#title-container"); 
+        const headerContentDiv = d3.select("#header-content"); 
+        // Loader element
+        const loader = d3.select("#loader");
 
         // Modal Elements
         const modalBackground = d3.select("#modal-background");
@@ -885,28 +825,26 @@
         const modalTitle = d3.select("#modal-title");
         const modalCloseButton = d3.select("#modal-close");
         const modalSearchInput = d3.select("#modal-search-input");
-        const modalList = d3.select("#modal-list"); // Now uses .dropdown-list class
+        const modalList = d3.select("#modal-list"); 
 
         // --- Globe State ---
         let width, height, projection, path, graticule, sphere, zoom, drag;
         let topojsonFeatures;
         const initialScaleFactor = 0.9;
-        // Initial rotation adjusted to show Americas
-        const initialRotation = { x: 70, y: -25, z: 0 }; // Adjusted initial rotation
+        const initialRotation = { x: 70, y: -25, z: 0 }; 
         let currentRotation = { ...initialRotation };
-        let searchableCountries = []; // List of countries with data for search
+        let searchableCountries = []; 
         let selectedCountryId = null;
-        let localTimeInterval = null; // Variable to store the time update interval
-        let currentTween = null; // Variable to store the current GSAP tween
+        let localTimeInterval = null; 
+        let currentTween = null; 
 
         // --- Globe Setup and Rendering ---
 
-        // Function to set up globe dimensions and projection
         function setupGlobe() {
             const containerRect = globeContainer.node().getBoundingClientRect();
             width = containerRect.width;
             height = containerRect.height;
-            width = Math.max(width, 300); // Ensure minimum size
+            width = Math.max(width, 300); 
             height = Math.max(height, 300);
 
             svg.attr("width", width).attr("height", height);
@@ -916,34 +854,29 @@
             projection = d3.geoOrthographic()
                 .scale(effectiveScale)
                 .translate([width / 2, height / 2])
-                .rotate([currentRotation.x, currentRotation.y, currentRotation.z]) // Use currentRotation
+                .rotate([currentRotation.x, currentRotation.y, currentRotation.z]) 
                 .clipAngle(90);
 
             path = d3.geoPath().projection(projection);
             graticule = d3.geoGraticule10();
 
-            // Zoom behavior (handled by GSAP)
-            zoom = d3.zoom().scaleExtent([1, 8]).on("zoom", null); // Zoom handled by GSAP
+            zoom = d3.zoom().scaleExtent([1, 8]).on("zoom", null); 
 
-            // Drag behavior
             drag = d3.drag()
                 .subject(() => {
-                    // Kill any ongoing animation when starting drag
                     if (currentTween) {
                         currentTween.kill();
                         currentTween = null;
                     }
                     const r = projection.rotate();
                     const sensFactor = projection.scale() / effectiveScale;
-                    const sens = 0.25 / Math.max(sensFactor, 0.5); // Adjust sensitivity based on scale
+                    const sens = 0.25 / Math.max(sensFactor, 0.5); 
                     return { x: r[0] / sens, y: -r[1] / sens, sens: sens };
                 })
                 .on("start", (event) => {
-                    // Prevent click event after drag starts
                     event.sourceEvent.stopPropagation();
-                     // Hide info panel visuals if dragging starts while it's visible
                     if (infoPanel.classed("visible")) {
-                         hideInfoPanel(); // Hide visuals, don't reset state yet
+                         hideInfoPanel(); 
                     }
                 })
                 .on("drag", (event) => {
@@ -955,34 +888,30 @@
                         y: rotate[1] - event.dy * sens,
                         z: rotate[2]
                     };
-                    newRotation.y = Math.max(-85, Math.min(85, newRotation.y)); // Limit vertical rotation
+                    newRotation.y = Math.max(-85, Math.min(85, newRotation.y)); 
                     projection.rotate([newRotation.x, newRotation.y, newRotation.z]);
-                    currentRotation = newRotation; // Update state
-                    renderGlobe(); // Re-render
+                    currentRotation = newRotation; 
+                    renderGlobe(); 
                 });
 
             svg.call(drag);
             svg.call(zoom);
-            svg.on("click", handleBackgroundClick); // Handle clicks on background/water
+            svg.on("click", handleBackgroundClick); 
 
-            // Clear previous SVG content
             svg.selectAll("*").remove();
 
-            // Define SVG filters (subtle glow for water)
             const defs = svg.append("defs");
             const filter = defs.append("filter").attr("id", "ocean-glow");
-            filter.append("feGaussianBlur").attr("stdDeviation", "1.5").attr("result", "coloredBlur"); // Reduced glow
+            filter.append("feGaussianBlur").attr("stdDeviation", "1.5").attr("result", "coloredBlur"); 
             const feMerge = filter.append("feMerge");
             feMerge.append("feMergeNode").attr("in", "coloredBlur");
             feMerge.append("feMergeNode").attr("in", "SourceGraphic");
 
-            // Add sphere (water)
             svg.append("path")
                 .datum({type: "Sphere"})
                 .attr("id", "sphere")
                 .attr("class", "water");
 
-            // Add graticule
             svg.append("path")
                 .datum(graticule)
                 .attr("class", "graticule")
@@ -990,141 +919,119 @@
                 .attr("stroke", "rgba(128,128,128,0.2)")
                 .attr("stroke-width", 0.5);
 
-            // Add group for land features
             svg.append("g").attr("class", "land-features");
 
-            // Initial render
             renderGlobe();
         }
 
-        // Function to render or update the globe
         function renderGlobe() {
             if (!path || !topojsonFeatures) return;
 
-            // Update projection based on current state
             projection.scale(projection.scale());
             projection.rotate([currentRotation.x, currentRotation.y, currentRotation.z]);
             path = d3.geoPath().projection(projection);
 
-            // Update sphere and graticule
             svg.select("#sphere").attr("d", path);
             svg.select(".graticule").attr("d", path);
 
-            // Filter features (exclude Antarctica, ID '010')
             const filteredFeatures = topojsonFeatures.filter(d => d.id && d.id !== '010');
 
-            // Bind data to land paths
             const land = svg.select(".land-features")
                 .selectAll("path.land")
-                .data(filteredFeatures, d => d.id); // Use country ID as key
+                .data(filteredFeatures, d => d.id); 
 
-            // Enter selection
             land.enter()
                 .append("path")
                 .attr("class", "land")
                 .attr("d", path)
-                .on("click", handleCountryClick) // Attach click handler
+                .on("click", handleCountryClick) 
                 .on("mouseover", function(event, d) {
-                    // Apply hover effect only if data is available or if it's the selected country
                     if (getCountryInfo(d) || d3.select(this).classed("selected")) {
-                        // Add hover styling if needed, e.g., d3.select(this).style('fill', 'darkgrey');
                     }
                  })
                 .on("mouseout", function(event, d) {
-                     // Remove hover styling if needed
                  })
-                .append("title") // Tooltip
-                 .text(d => getCountryInfo(d)?.nameEs || d.properties?.name || `ID: ${d.id}`); // Show Spanish name if available
+                .append("title") 
+                 .text(d => getCountryInfo(d)?.nameEs || d.properties?.name || `ID: ${d.id}`); 
 
-            // Update selection
             land.merge(land)
-                 .classed("data-available", d => !!getCountryInfo(d)) // Add class if country is in our data
-                 .classed("selected", d => parseInt(d.id, 10) === selectedCountryId) // Apply 'selected' class, corrected ID comparison
-                 .attr("d", path); // Update path
+                 .classed("data-available", d => !!getCountryInfo(d)) 
+                 .classed("selected", d => parseInt(d.id, 10) === selectedCountryId) 
+                 .attr("d", path); 
 
-            // Exit selection
             land.exit().remove();
         }
 
         // --- Data Loading and Processing ---
 
-        // Load TopoJSON data
         async function loadData() {
             try {
                 const world = await d3.json("https://unpkg.com/world-atlas@2/countries-110m.json");
                 topojsonFeatures = topojson.feature(world, world.objects.countries).features;
 
-                // Prepare list of searchable countries (using Spanish names where available)
-                // Only include countries present in our countriesData array
                 searchableCountries = topojsonFeatures
                     .map(d => {
                         const info = getCountryInfo(d);
-                        if (info) { // Only include if country info exists in our data
-                            const name = info.nameEs || info.name; // Prioritize Spanish name
+                        if (info) { 
+                            const name = info.nameEs || info.name; 
                             if (name) {
-                                return { id: info.id, nameEs: name }; // Use numeric ID from countriesData
+                                return { id: info.id, nameEs: name }; 
                             }
                         }
                         return null;
                     })
-                    .filter(Boolean) // Remove null entries
-                    .sort((a, b) => a.nameEs.localeCompare(b.nameEs)); // Sort alphabetically by Spanish name
+                    .filter(Boolean) 
+                    .sort((a, b) => a.nameEs.localeCompare(b.nameEs)); 
 
                 console.log("Data loaded and processed.");
-                // Ensure controls-active class is not active initially
                 body.classed("controls-active", false);
-                setupGlobe(); // Set up the globe
+                setupGlobe(); 
+                
+                // --- Ocultar Loader con transición suave al terminar la carga ---
+                loader.classed("hidden", true);
+                // Eliminar del DOM después de la transición para limpiar
+                setTimeout(() => {
+                    loader.remove();
+                }, 500);
+
             } catch (error) {
                 console.error("Error loading or processing data:", error);
-                globeContainer.html("<p style='color: red; text-align: center;'>Error al cargar los datos del globo.</p>");
+                // Mostrar error en el loader si falla
+                d3.select(".loading-text").text("ERROR AL CARGAR").style("color", "#ff0000");
+                d3.select(".spinner").style("border-top-color", "#ff0000");
             }
         }
 
-        // Get country info from our custom countriesData array
         function getCountryInfo(topojsonFeature) {
             if (!topojsonFeature || !topojsonFeature.id) return null;
-            const id = parseInt(topojsonFeature.id, 10); // Ensure ID is a number for matching
+            const id = parseInt(topojsonFeature.id, 10); 
             return countriesData.find(c => c.id === id);
         }
 
         // --- Modal Functions ---
 
-        // Show the modal
         function showModal(title, data, itemType) {
             modalTitle.text(title);
-            modalList.html(''); // Clear previous list items
-            modalSearchInput.property('value', ''); // Clear modal search input
+            modalList.html(''); 
+            modalSearchInput.property('value', ''); 
 
             const listItems = modalList.selectAll("button")
                 .data(data)
                 .enter()
                 .append("button")
-                .text(d => d.nameEs || d.name); // Use nameEs for countries, name for provinces
+                .text(d => d.nameEs || d.name); 
 
             if (itemType === 'country') {
-                listItems.attr("data-country-id", d => d.id) // Use numeric ID
+                listItems.attr("data-country-id", d => d.id) 
                     .on("click", function() {
                         const countryIdAttr = d3.select(this).attr("data-country-id");
-                        console.log("Modal country button clicked. Country ID:", countryIdAttr); // Debugging log
                         const countryName = d3.select(this).text();
-                        searchInput.property("value", countryName); // Update main search input
-                        hideModal(); // Hide modal first
-                        selectCountry(parseInt(countryIdAttr, 10)); // Then select the country
+                        searchInput.property("value", countryName); 
+                        hideModal(); 
+                        selectCountry(parseInt(countryIdAttr, 10)); 
                     });
-            } else if (itemType === 'province') {
-                 // Esta lógica ya no se usa, se mantiene por si acaso pero
-                 // la selección de provincia ahora usa un <select> nativo.
-                 listItems.attr("data-province-code", d => d.code)
-                    .on("click", function() {
-                        const provinceCode = d3.select(this).attr("data-province-code");
-                        const provinceName = d3.select(this).text();
-                        provinceSearchInput.property("value", provinceName); // Update province search input
-                        hideModal();
-                        updateProvinceLink(provinceCode); // Update the province link
-                    });
-            }
+            } 
 
-            // Filter modal list on input
             modalSearchInput.on("input", function() {
                 const query = d3.select(this).property("value").trim().toLowerCase();
                 modalList.selectAll("button").each(function() {
@@ -1138,135 +1045,88 @@
                 });
             });
 
-            // Use classes for modal visibility transitions
             modalBackground.classed("visible", true);
             modalContainer.classed("visible", true);
-            modalSearchInput.node().focus(); // Focus modal search input
+            modalSearchInput.node().focus(); 
 
-            // Ensure controls-active is set when modal is shown (triggered by focus/click)
             body.classed("controls-active", true);
         }
 
-        // Hide the modal
         function hideModal() {
-            // Use classes for modal visibility transitions
             modalBackground.classed("visible", false);
             modalContainer.classed("visible", false);
-
-            // Clear list items after transition (optional, depends on desired effect)
-            // setTimeout(() => {
-            //     if (!modalContainer.classed("visible")) { // Check if still hidden
-            //         modalList.html('');
-            //         modalSearchInput.property('value', '');
-            //     }
-            // }, 300); // Match CSS transition duration
-
-            // Do not change controls-active state here; let other functions manage it
         }
 
 
         // --- Interaction Functions ---
 
-        // Handle click on a country feature
         function handleCountryClick(event, d) {
-             event.stopPropagation(); // Prevent click from propagating to background
+             event.stopPropagation(); 
 
-             // Check if the clicked country is in our data
              const countryInfo = getCountryInfo(d);
              if (!countryInfo) {
                  console.log("Clicked on a country not in data:", d.properties?.name || d.id);
-                 // Do nothing to the current state if clicking non-data country
                  return;
              }
 
-             // Ensure controls are active immediately when clicking a valid country
              body.classed("controls-active", true);
 
-
              if (d && d.id) {
-                // If clicking the *same* selected country again, do nothing
-                if (parseInt(d.id, 10) === selectedCountryId) {
-                    console.log("Clicked same country again.");
+                const clickedId = parseInt(d.id, 10);
+
+                // --- CAMBIO AQUÍ ---
+                // Si el ID clickeado es igual al que ya está seleccionado...
+                if (clickedId === selectedCountryId) {
+                    // ...simplemente actualizamos/abrimos el panel de nuevo y terminamos.
+                    updateInfoPanel(clickedId);
                     return;
                 }
-                console.log("Clicked on country with data:", countryInfo.nameEs || countryInfo.name, "ID:", countryInfo.id); // Debugging log
-                selectCountry(countryInfo.id); // Use numeric ID from countryInfo
-                // Update search input with the selected country's name
+                // -------------------
+
+                selectCountry(countryInfo.id); 
                 searchInput.property("value", countryInfo.nameEs || countryInfo.name);
-             } else {
-                console.warn("Clicked on invalid feature:", d);
-                // Do nothing to the current state
-             }
+             } 
         }
 
-        // Handle click on the globe background (water/space)
         function handleBackgroundClick(event) {
-            // Check if the click was directly on the SVG or the water path
             if (event.target === svg.node() || event.target === svg.select("#sphere").node()) {
-                resetView(); // Reset view if background is clicked
+                resetView(); 
             }
         }
 
-        // Select a country by ID, animate globe, and show info panel
         function selectCountry(countryId) {
-             console.log("Attempting to select country ID:", countryId); // Debugging log at start
-
-             // Ensure the country is in our data before proceeding
-             const countryInfo = countriesData.find(c => c.id === countryId); // Find by numeric ID
+             const countryInfo = countriesData.find(c => c.id === countryId); 
              if (!countryInfo) {
-                 console.warn("Attempted to select country not in data:", countryId); // Debugging log
-                 // Do not change controls-active state here
                  return;
              }
-             console.log("Country info found:", countryInfo.nameEs || countryInfo.name); // Debugging log
 
-             // Apply controls-active immediately since a valid country is being selected
              body.classed("controls-active", true);
 
-             // Find the corresponding TopoJSON feature using the numeric ID
-             const countryFeature = topojsonFeatures.find(f => parseInt(f.id, 10) === countryId); // Corrected ID comparison
+             const countryFeature = topojsonFeatures.find(f => parseInt(f.id, 10) === countryId); 
              if (!countryFeature) {
-                 console.warn("Country feature not found for ID:", countryId); // Debugging log
-                 updateInfoPanel(countryId); // Still show panel info if possible
-                 // Controls active already set above
-                 return; // Don't animate if feature not found
+                 updateInfoPanel(countryId); 
+                 return; 
              }
-             console.log("Country feature found:", countryFeature.properties.name); // Debugging log
 
+             selectedCountryId = countryId; 
+             renderGlobe(); 
 
-             selectedCountryId = countryId; // Update state
-             console.log("Selected:", countryInfo.nameEs || countryFeature.properties.name, "ID:", countryId); // Debugging log
-
-             renderGlobe(); // Re-render to highlight
-
-             // Calculate centroid and target view
              const centroid = d3.geoCentroid(countryFeature);
-             console.log("Calculated centroid:", centroid); // Debugging log
              if (!centroid || !Array.isArray(centroid) || centroid.some(isNaN)) {
-                 console.warn("Invalid centroid for country:", countryId, centroid); // Debugging log
-                 updateInfoPanel(countryId); // Show info panel if possible
-                 // Controls active already set above
-                 return; // Don't animate if centroid is invalid
+                 updateInfoPanel(countryId); 
+                 return; 
              }
 
              const targetRotation = { x: -centroid[0], y: -centroid[1] };
              const baseScale = Math.min(width, height) / 2 * initialScaleFactor;
-             const targetScale = baseScale * 2.5; // Zoom factor
+             const targetScale = baseScale * 2.5; 
 
-             console.log("Animating to rotation:", targetRotation, "scale:", targetScale); // Debugging log
-             // Animate rotation and scale
              rotateTo(targetRotation.x, targetRotation.y, targetScale, () => {
-                 console.log("Animation complete callback."); // Debugging log
-                 updateInfoPanel(countryId); // Update info panel *after* animation
-                 // Controls active already set above
+                 updateInfoPanel(countryId); 
              });
         }
 
-        // Animate globe rotation and scale using GSAP
         function rotateTo(lon, lat, scale, onCompleteCallback = null) {
-            console.log("Animating to Lon:", lon, "Lat:", lat, "Scale:", scale);
-
-            // Kill any existing tween before starting a new one
             if (currentTween) {
                 currentTween.kill();
             }
@@ -1276,26 +1136,22 @@
 
             const rotationProxy = { lon: currentRot[0], lat: currentRot[1], scale: currentScale };
 
-            // Use GSAP to animate the proxy object
             currentTween = gsap.to(rotationProxy, {
                 lon: lon,
                 lat: lat,
                 scale: scale,
-                duration: 1.5, // Increased duration
-                ease: "sine.inOut", // Smoother easing
+                duration: 1.5, 
+                ease: "sine.inOut", 
                 onUpdate: () => {
-                     // Update projection during animation
                      currentRotation = { x: rotationProxy.lon, y: rotationProxy.lat, z: currentRotation.z };
                      projection.scale(rotationProxy.scale);
                     renderGlobe();
                 },
                 onComplete: () => {
-                     console.log("GSAP Animation complete."); // Debugging log
-                     // Ensure final state is set correctly
                      currentRotation = { x: lon, y: lat, z: currentRotation.z };
                      projection.scale(scale);
                     renderGlobe();
-                    currentTween = null; // Clear the tween reference
+                    currentTween = null; 
                     if (onCompleteCallback) {
                         onCompleteCallback();
                     }
@@ -1303,89 +1159,70 @@
             });
         }
 
-        // Update info panel content
         function updateInfoPanel(countryId) {
-            console.log("Updating info panel for ID:", countryId); // Debugging log
-
-            // Ensure country is in our data before proceeding
             const countryInfo = countriesData.find(c => c.id === countryId);
             if (!countryInfo) {
-                console.warn("Attempted to update info panel for country not in data:", countryId); // Debugging log
-                hideInfoPanel(); // Hide panel visuals
+                hideInfoPanel(); 
                 return;
             }
-            console.log("Info panel country info:", countryInfo.nameEs || countryInfo.name); // Debugging log
 
             const countryName = countryInfo.nameEs || countryInfo.name || "País Desconocido";
-            const countryCode = countryInfo.code; // Use code from data
-            const timezone = countryInfo.timezone; // Get timezone
+            const countryCode = countryInfo.code; 
+            const timezone = countryInfo.timezone; 
 
             countryNameEl.text(countryName);
 
-            // --- Show Local Time ---
-            clearInterval(localTimeInterval); // Clear previous interval if exists
-            localTimeEl.text(''); // Clear previous time text
+            clearInterval(localTimeInterval); 
+            localTimeEl.text(''); 
 
             if (timezone) {
-                // Function to update time
                 const updateTime = () => {
                     try {
                         const now = new Date();
                         const options = {
                             hour: '2-digit',
                             minute: '2-digit',
-                            hour12: true, // 12-hour format (AM/PM)
+                            hour12: true, 
                             timeZone: timezone
                         };
-                        // Use Intl.DateTimeFormat for robust and localized time formatting
                         const formatter = new Intl.DateTimeFormat('es-ES', options);
-                        localTimeEl.text(`${formatter.format(now)}`); // Just the time, no "Hora local:"
+                        localTimeEl.text(`${formatter.format(now)}`); 
                     } catch (e) {
-                        console.error("Error formatting time for timezone:", timezone, e); // Debugging log
-                        localTimeEl.text(`N/A`); // Show N/A on error
+                        console.error("Error formatting time for timezone:", timezone, e); 
+                        localTimeEl.text(`N/A`); 
                     }
                 };
 
-                updateTime(); // Show time immediately
-                localTimeInterval = setInterval(updateTime, 60000); // Update every minute
+                updateTime(); 
+                localTimeInterval = setInterval(updateTime, 60000); 
             } else {
-                localTimeEl.text(`N/A`); // Show N/A if no timezone
+                localTimeEl.text(`N/A`); 
             }
 
-
-            // --- Show Flag ---
-            flagContainer.html(''); // Clear previous flag
+            flagContainer.html(''); 
             if (countryInfo.flagUrl) {
-                // Try loading flag image
                 flagContainer.append('img')
                     .attr('src', countryInfo.flagUrl)
                     .attr('alt', `Bandera de ${countryName}`)
                     .on('error', function() {
-                        // If image fails, show fallback emoji
-                        console.warn(`Flag image failed to load: ${countryInfo.flagUrl}`); // Debugging log
-                        d3.select(this).remove(); // Remove broken image tag
-                        flagContainer.append('span').text(getFlagEmoji(countryCode)); // Show emoji
+                        d3.select(this).remove(); 
+                        flagContainer.append('span').text(getFlagEmoji(countryCode)); 
                     });
             } else {
-                // If no flag URL, show emoji directly
-                console.log("No flag URL found, using emoji."); // Debugging log
                 flagContainer.append('span').text(getFlagEmoji(countryCode));
             }
 
-            // --- Show Links ---
-            linksContainer.html(''); // Clear previous general links
-            argentinaProvincesContainer.style("display", "none"); // Hide Argentina section by default
-            provinceLinksContainer.html(''); // Clear province links
-            provinceSearchInput.property('value', ''); // Clear province search input
+            linksContainer.html(''); 
+            argentinaProvincesContainer.style("display", "none"); 
+            provinceLinksContainer.html(''); 
+            provinceSearchInput.property('value', ''); 
 
-            // Add general electoral link or search link
             if (countryInfo.electoralUrl) {
                  linksContainer.append("a")
                     .attr("href", countryInfo.electoralUrl)
                     .attr("target", "_blank")
-                    .text(`Registro Electoral`); // Generic text
+                    .text(`Registro Electoral`); 
             } else {
-                 // Provide generic search link if no specific URL available
                  const searchLink = `https://www.google.com/search?q=registro+electoral+oficial+${encodeURIComponent(countryName)}`;
                  linksContainer.append("a")
                     .attr("href", searchLink)
@@ -1393,240 +1230,166 @@
                     .text(`Buscar registro electoral`);
             }
 
-            // --- Argentina Specific Section ---
             if (countryCode === "AR") {
-                console.log("Country is Argentina, showing provinces section."); // Debugging log
-                argentinaProvincesContainer.style("display", "block"); // Show section
+                argentinaProvincesContainer.style("display", "block"); 
                 
-                // --- INICIO: Poblar el <select> de provincias ---
-                // Limpiar opciones existentes (excepto la primera)
                 provinceSearchInput.selectAll("option:not(:first-child)").remove();
                 
-                // Ordenar provincias alfabéticamente
                 const sortedProvinces = Object.entries(argentinaProvincesData)
                                           .map(([code, info]) => ({ code: code, name: info.name }))
                                           .sort((a, b) => a.name.localeCompare(b.name));
 
-                // Añadir nuevas opciones
                 sortedProvinces.forEach(province => {
                     provinceSearchInput.append("option")
                         .attr("value", province.code)
                         .text(province.name);
                 });
                 
-                // Resetear valor
                 provinceSearchInput.property('value', '');
-                // --- FIN: Poblar el <select> de provincias ---
             }
 
-            // Show the panel using class for transition
             infoPanel.classed("visible", true);
-            console.log("Info panel set to visible."); // Debugging log
         }
 
-        // Hide the info panel visuals (doesn't reset state)
         function hideInfoPanel() {
-            console.log("Hiding info panel visuals."); // Debugging log
-            // Hide panel using class for transition
             infoPanel.classed("visible", false);
 
-            // Clear Argentina specific fields when hiding visuals
             provinceSearchInput.property('value', '');
             provinceLinksContainer.html('');
             argentinaProvincesContainer.style("display", "none");
 
-            // Clear time update interval
             clearInterval(localTimeInterval);
-            localTimeEl.text(''); // Clear time text
+            localTimeEl.text(''); 
         }
 
-        // Reset globe view and hide info panel
         function resetView() {
-             console.log("Resetting view."); // Debugging log
              const baseScale = Math.min(width, height) / 2 * initialScaleFactor;
-             const wasSelected = selectedCountryId !== null; // Check if a country *was* selected
+             const wasSelected = selectedCountryId !== null; 
 
-             // Clear selection state *before* animation starts
              if (wasSelected) {
-                 selectedCountryId = null; // Deselect country
-                 renderGlobe(); // Re-render immediately to remove highlight before animation
+                 selectedCountryId = null; 
+                 renderGlobe(); 
              }
 
-             // Hide the info panel visuals
              hideInfoPanel();
-
-             // Clear search input
              searchInput.property("value", "");
-
-             // Hide modal visuals
              hideModal();
-
-             // Animate back to initial view
              rotateTo(initialRotation.x, initialRotation.y, baseScale);
-
-             // Explicitly set controls-active to false when resetting the view
              body.classed("controls-active", false);
-
-
-             // Clear time update interval (already done in hideInfoPanel, but safe to repeat)
              clearInterval(localTimeInterval);
-             localTimeEl.text(''); // Clear time text
+             localTimeEl.text(''); 
         }
 
-        // Helper function to get flag emoji from ISO A2 country code
         function getFlagEmoji(countryCode) {
-            if (!countryCode || typeof countryCode !== 'string' || countryCode.length !== 2) return '🏳️'; // Default flag
-            // Ensure code is uppercase A-Z letters
+            if (!countryCode || typeof countryCode !== 'string' || countryCode.length !== 2) return '🏳️'; 
             if (!/^[A-Z]{2}$/.test(countryCode)) return '🏳️';
             try {
-                // Calculate regional indicator code points (e.g., 'U' + offset, 'S' + offset)
                 const codePoints = countryCode.toUpperCase()
                     .split('')
                     .map(char => 127397 + char.charCodeAt(0));
-                return String.fromCodePoint(...codePoints); // Create emoji string
+                return String.fromCodePoint(...codePoints); 
             } catch (e) {
-                console.error("Error creating flag emoji for code:", countryCode, e); // Debugging log
-                return '🏳️'; // Fallback on error
+                return '🏳️'; 
             }
         }
 
-        // Function to update province link based on code
         function updateProvinceLink(provinceCode) {
-             provinceLinksContainer.html(''); // Clear previous province links
+             provinceLinksContainer.html(''); 
              const provinceInfo = argentinaProvincesData[provinceCode];
 
              if (provinceInfo) {
-                 console.log("Province selected:", provinceInfo.name); // Debugging log
                  if (provinceInfo.url) {
-                    // Show specific province link
                     provinceLinksContainer.append("a")
                         .attr("href", provinceInfo.url)
                         .attr("target", "_blank")
                         .text(`Padrón de ${provinceInfo.name}`);
                  } else {
-                     // If no specific URL, show a message:
                      provinceLinksContainer.append("span")
                          .style("font-size", "0.8em")
                          .style("color", "#aaa")
                          .text(`Use el enlace nacional para ${provinceInfo.name}.`);
                  }
             } else {
-                // If code is invalid (shouldn't happen with dropdown), clear the area
                  provinceLinksContainer.html('');
-                 console.log("Invalid province code:", provinceCode); // Debugging log
             }
         }
 
 
         // --- Event Listeners ---
 
-        // Handle focus on main country search input to show modal
         searchInput.on("focus", function() {
-            console.log("Search input focused. Showing country modal."); // Debugging log
-            // Ensure controls are active when input is focused
             body.classed("controls-active", true);
-            // Get list of countries for modal
             const countriesForModal = searchableCountries.map(c => ({ id: c.id, nameEs: c.nameEs }));
-            showModal("Buscar país", countriesForModal, 'country');
+            showModal("Buscar País", countriesForModal, 'country');
         });
 
-        // Handle click on main country search input to show modal
          searchInput.on("click", function() {
-             console.log("Search input clicked. Showing country modal."); // Debugging log
-             // Ensure controls are active when input is clicked
              body.classed("controls-active", true);
-             // Get list of countries for modal
              const countriesForModal = searchableCountries.map(c => ({ id: c.id, nameEs: c.nameEs }));
-             showModal("Buscar país", countriesForModal, 'country');
+             showModal("Buscar País", countriesForModal, 'country');
          });
 
-         // Handle blur on main search input
          searchInput.on("blur", function() {
-             // Use a small timeout to allow clicks on modal buttons etc. before checking state
              setTimeout(() => {
-                 // If the modal is hidden AND no country is selected AND the input is now blurred
                  if (!modalContainer.classed("visible") && selectedCountryId === null && document.activeElement !== searchInput.node()) {
                       body.classed("controls-active", false);
                  }
-             }, 150); // Delay slightly
+             }, 150); 
          });
 
 
-        // Handle change on province select dropdown (for Argentina)
         provinceSearchInput.on("change", function() {
             const selectedCode = d3.select(this).property("value");
-            console.log("Province selected:", selectedCode); // Debugging log
             if (selectedCode) {
                 updateProvinceLink(selectedCode);
             } else {
-                provinceLinksContainer.html(''); // Clear if default option selected
+                provinceLinksContainer.html(''); 
             }
         });
 
 
-        // Handle click on modal close button
         modalCloseButton.on("click", hideModal);
-
-        // Handle click on modal background to close it
         modalBackground.on("click", hideModal);
 
-
-        // Handle click on a country feature on the globe (handler attached in setupGlobe)
-
-        // Handle click on globe background (water/space) - acts as reset (handler attached in setupGlobe)
-
-        // Handle window resize
         function handleResize() {
-            console.log("Resizing window...");
-            // Re-setup globe dimensions and projection
             setupGlobe();
 
-            // If a country was selected, try to re-center and re-zoom
-            if (selectedCountryId !== null) { // Check if a country is selected
-                 const countryFeature = topojsonFeatures.find(f => parseInt(f.id, 10) === selectedCountryId); // Corrected ID comparison
-                 // Ensure selected country is still in our data after resize
-                 if (countryFeature && countriesData.find(c => c.id === selectedCountryId)) { // Check against countriesData
+            if (selectedCountryId !== null) { 
+                 const countryFeature = topojsonFeatures.find(f => parseInt(f.id, 10) === selectedCountryId); 
+                 if (countryFeature && countriesData.find(c => c.id === selectedCountryId)) { 
                     const centroid = d3.geoCentroid(countryFeature);
                      if (centroid && Array.isArray(centroid) && !centroid.some(isNaN)) {
                          const baseScale = Math.min(width, height) / 2 * initialScaleFactor;
                          const targetScale = baseScale * 2.5;
                          const targetRotation = { x: -centroid[0], y: -centroid[1], z: currentRotation.z };
-                         // Immediately set new rotation and scale without animation on resize
                          currentRotation = { x: targetRotation.x, y: targetRotation.y, z: currentRotation.z };
                          projection.scale(targetScale);
                          projection.rotate([currentRotation.x, currentRotation.y, currentRotation.z]);
-                         renderGlobe(); // Re-render with new settings
-                         // Ensure info panel remains visible if it was open
+                         renderGlobe(); 
                          if (infoPanel.classed("visible")) {
-                             updateInfoPanel(selectedCountryId); // Refresh panel content if needed
+                             updateInfoPanel(selectedCountryId); 
                          }
                      } else {
-                          console.warn("Invalid centroid after resize, resetting view.");
                           resetView();
                      }
                  } else {
-                      console.warn("Selected country feature not found or not in data after resize, resetting view.");
                       resetView();
                  }
             } else {
-                // Just re-render if no country is selected
                 renderGlobe();
             }
          }
 
-        // Handle resize event with debounce
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(handleResize, 250); // Wait 250ms after last resize event
+            resizeTimeout = setTimeout(handleResize, 250); 
         });
 
-        // --- Initialization ---
-        loadData(); // Start data loading when script runs
+        loadData(); 
 
-        // Ensure modal is hidden on page load with a slight delay
         window.addEventListener('load', () => {
-            setTimeout(hideModal, 50); // Add small delay (50ms)
+            setTimeout(hideModal, 50); 
         });
 
     </script>
